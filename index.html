@@ -7,9 +7,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=PT+Serif:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
 <script src="config.js"></script>
 <style>
   :root{
@@ -72,6 +69,81 @@
 <div class="wrap" id="app"></div>
 
 <script>
+/* ---------- ФОРМУЛЫ ----------
+   KaTeX грузится с трёх источников по очереди.
+   Если ни один не доступен — формулы показываются простым текстом,
+   но никогда сырым кодом.                                        */
+
+const KATEX_CDN = [
+  "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/",
+  "https://unpkg.com/katex@0.16.11/dist/",
+  "https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/"
+];
+let katexState = "loading";
+
+function loadKatex(i){
+  if(i >= KATEX_CDN.length){ katexState = "failed"; mathify(); return; }
+  const base = KATEX_CDN[i];
+  const css = document.createElement("link");
+  css.rel = "stylesheet"; css.href = base + "katex.min.css";
+  document.head.appendChild(css);
+  const s1 = document.createElement("script");
+  s1.src = base + "katex.min.js";
+  s1.onerror = () => loadKatex(i+1);
+  s1.onload = () => {
+    const s2 = document.createElement("script");
+    s2.src = base + "contrib/auto-render.min.js";
+    s2.onerror = () => loadKatex(i+1);
+    s2.onload = () => { katexState = "ready"; mathify(); };
+    document.head.appendChild(s2);
+  };
+  document.head.appendChild(s1);
+}
+
+function texToPlain(s){
+  return s
+    .replace(/(\d)\s*\\d?frac\{([^{}]*)\}\{([^{}]*)\}/g, "$1 $2/$3")
+    .replace(/\\d?frac\{([^{}]*)\}\{([^{}]*)\}/g, "$1/$2")
+    .replace(/\\left|\\right/g, "")
+    .replace(/\\cdots|\\ldots|\\dots/g, "…")
+    .replace(/\\cdot/g, "·")
+    .replace(/\\times/g, "×")
+    .replace(/\\text\{([^{}]*)\}/g, "$1")
+    .replace(/\\,|\\;|\\ /g, " ")
+    .replace(/\{,\}/g, ",")
+    .replace(/\^\{?2\}?/g, "²").replace(/\^\{?3\}?/g, "³").replace(/\^\{?4\}?/g, "⁴")
+    .replace(/[{}]/g, "")
+    .replace(/\\/g, "")
+    .trim();
+}
+
+function plainMath(root){
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while(walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach(n => {
+    if(n.nodeValue.indexOf("$") < 0) return;
+    n.nodeValue = n.nodeValue.replace(/\$([^$]+)\$/g, (m, inner) => texToPlain(inner));
+  });
+}
+
+function mathify(){
+  const root = document.getElementById("app");
+  if(!root) return;
+  if(katexState === "ready" && window.renderMathInElement){
+    try{
+      renderMathInElement(root, {
+        delimiters: [{left:"$$",right:"$$",display:true},{left:"$",right:"$",display:false}],
+        throwOnError: false
+      });
+      return;
+    }catch(e){ katexState = "failed"; }
+  }
+  if(katexState === "failed") plainMath(root);
+}
+
+loadKatex(0);
+
 /* ---------- словарь интерфейса ---------- */
 const T = {
   kz: {
@@ -230,12 +302,7 @@ function renderTask(id, q){
       <button class="btn" id="b_go" disabled onclick="send(${id}, false)">${t("answer")}</button>
       <button class="ghost" onclick="send(${id}, true)">${t("dont_know")}</button>
     </div>`;
-  if(window.renderMathInElement){
-    renderMathInElement(document.querySelector(".qcard"), {
-      delimiters: [{left:"$$",right:"$$",display:true},{left:"$",right:"$",display:false}],
-      throwOnError: false
-    });
-  }
+  mathify();
   window.pick = (i)=>{
     picked = i;
     document.querySelectorAll(".opt").forEach(b=>b.dataset.on = (+b.dataset.i===i)?1:0);
