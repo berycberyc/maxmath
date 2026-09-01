@@ -2,478 +2,460 @@
 <html lang="kk">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#12201C">
 <title>MaxMath</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=PT+Serif:wght@400;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600&family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <style>
   :root{
-    --paper:#F6F7F9; --card:#FFFFFF; --ink:#1B2733; --soft:#5E6E7E;
-    --rule:#DDE3EA; --blue:#2D5F8A; --green:#3E7A5E; --red:#B4453C;
+    --paper:#F3F5F3; --card:#FFFFFF; --ink:#12201C; --soft:#61756E;
+    --rule:#DCE4E0; --teal:#1F6F6B; --teal-d:#164F4C; --amber:#D98324;
+    --l0:#B4453C; --l1:#D98324; --l2:#4A8C6F; --l3:#1F6F6B;
+    --pad: max(16px, env(safe-area-inset-left));
   }
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--paper);color:var(--ink);
-    font-family:Inter,system-ui,sans-serif;font-size:16px;line-height:1.5;}
-  .wrap{max-width:680px;margin:0 auto;padding:26px 16px 60px;}
-  h1{font-family:'PT Serif',Georgia,serif;font-size:28px;line-height:1.25;
-     margin:0 0 10px;font-weight:700;letter-spacing:-.01em;}
-  h2{font-size:18px;margin:26px 0 12px;}
-  .sub{color:var(--soft);font-size:15px;margin:0 0 24px;}
-  label{display:block;font-size:13px;color:var(--soft);margin:14px 0 5px;}
-  input,select{width:100%;padding:12px 13px;border:1px solid var(--rule);
-    border-radius:8px;font:inherit;background:var(--card);color:var(--ink);}
-  input:focus,select:focus{outline:2px solid var(--blue);outline-offset:1px;}
-  .btn{appearance:none;border:0;border-radius:8px;background:var(--blue);color:#fff;
-    font:inherit;font-weight:500;padding:13px 22px;cursor:pointer;margin-top:20px;}
-  .btn:disabled{background:#B6C2CE;cursor:not-allowed;}
-  .ghost{background:none;border:1px solid var(--rule);color:var(--soft);
-    border-radius:8px;font:inherit;font-size:14px;padding:9px 14px;cursor:pointer;margin-top:0;}
-  .langrow{display:flex;gap:8px;justify-content:flex-end;margin-bottom:14px;}
-  .langrow button{background:none;border:0;font:inherit;font-size:14px;
-    color:var(--soft);cursor:pointer;padding:4px 8px;border-radius:6px;}
-  .langrow button[data-on="1"]{color:var(--blue);font-weight:700;}
-  .err{color:var(--red);font-size:14px;margin-top:12px;min-height:20px;}
-  .ok{color:var(--green);font-size:14px;margin-top:12px;min-height:20px;}
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  html,body{margin:0}
+  body{background:var(--paper); color:var(--ink);
+    font-family:Onest,system-ui,-apple-system,sans-serif; font-size:16px; line-height:1.5;}
+  .wrap{max-width:720px; margin:0 auto; padding:22px var(--pad) 64px;}
 
-  .ticks{display:flex;gap:5px;margin-bottom:22px;}
-  .tick{height:3px;flex:1;background:var(--rule);border-radius:2px;}
-  .tick[data-on="1"]{background:var(--blue);}
-  .qcard{background:var(--card);border:1px solid var(--rule);border-radius:12px;
-    padding:24px 20px;margin-bottom:16px;}
-  .qtext{font-family:'PT Serif',Georgia,serif;font-size:20px;line-height:1.55;margin:0 0 20px;}
-  .opt{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;
-    background:none;border:0;border-top:1px solid var(--rule);padding:14px 2px;
-    font:inherit;font-size:17px;cursor:pointer;color:var(--ink);}
-  .opt:last-of-type{border-bottom:1px solid var(--rule);}
-  .dot{flex:none;width:20px;height:20px;border-radius:50%;
-    border:1.5px solid #A9B7C4;margin-top:2px;}
-  .opt[data-on="1"] .dot{border-color:var(--blue);background:var(--blue);
-    box-shadow:inset 0 0 0 3.5px var(--card);}
-  .opt[data-on="1"]{color:var(--blue);}
-  .numin{width:100%;padding:16px 14px;border:1px solid var(--rule);border-radius:10px;
-    font-family:'PT Serif',Georgia,serif;font-size:28px;text-align:center;
-    letter-spacing:.08em;background:var(--paper);color:var(--ink);}
-  .numin:focus{outline:2px solid var(--blue);outline-offset:1px;border-color:transparent;}
-  .row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
+  h1{font-family:Literata,Georgia,serif; font-weight:600; font-size:27px;
+     line-height:1.2; margin:0 0 8px; letter-spacing:-.015em;}
+  h2{font-size:13px; font-weight:600; letter-spacing:.05em; text-transform:uppercase;
+     color:var(--soft); margin:28px 0 10px;}
+  .sub{color:var(--soft); font-size:15px; margin:0 0 22px;}
+  .note{font-size:13px; color:var(--soft); line-height:1.55; margin:6px 0 0;}
+  .err{color:var(--l0); font-size:14px; margin-top:12px; min-height:20px;}
 
-  table{width:100%;border-collapse:collapse;font-size:14px;margin-top:14px;}
-  th,td{text-align:left;padding:9px 7px;border-bottom:1px solid var(--rule);}
-  th{color:var(--soft);font-weight:500;font-size:13px;}
-  tr[data-off="1"] td{color:#A9B7C4;}
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px;}
-  .card{background:var(--card);border:1px solid var(--rule);border-radius:12px;
-    padding:20px;margin-bottom:18px;}
-  .big{font-family:'PT Serif',Georgia,serif;font-size:44px;font-weight:700;margin:16px 0 4px;}
-  @media (max-width:520px){.grid2{grid-template-columns:1fr;}}
+  label{display:block; font-size:13px; color:var(--soft); margin:14px 0 6px;}
+  input,select{width:100%; padding:14px; border:1px solid var(--rule); border-radius:10px;
+    font:inherit; font-size:16px; background:var(--card); color:var(--ink);}
+  input:focus,select:focus{outline:2px solid var(--teal); outline-offset:1px; border-color:transparent;}
+
+  .btn{appearance:none; border:0; border-radius:12px; background:var(--teal); color:#fff;
+    font:inherit; font-weight:600; font-size:17px; padding:16px 24px; cursor:pointer; width:100%;}
+  .btn:active{background:var(--teal-d)}
+  .btn:disabled{background:#B9C6C1; cursor:not-allowed}
+  .ghost{background:none; border:1px solid var(--rule); color:var(--soft); border-radius:10px;
+    font:inherit; font-size:14px; padding:10px 15px; cursor:pointer; width:auto;}
+  .ghost:active{background:var(--paper)}
+  .link{background:none; border:0; color:var(--teal); font:inherit; font-size:15px;
+    font-weight:500; cursor:pointer; padding:8px 0;}
+
+  .langrow{display:flex; gap:6px; justify-content:flex-end; margin-bottom:10px;}
+  .langrow button{background:none; border:0; font:inherit; font-size:14px; color:var(--soft);
+    cursor:pointer; padding:5px 9px; border-radius:8px;}
+  .langrow button[data-on="1"]{color:var(--teal); font-weight:700; background:#E7EFEC;}
+
+  .hero{background:var(--card); border:1px solid var(--rule); border-radius:18px;
+    padding:24px 20px; margin-bottom:16px;}
+  .chips{display:flex; gap:8px; flex-wrap:wrap; margin:16px 0 4px;}
+  .chip{font-size:13px; color:var(--soft); background:var(--paper);
+    border:1px solid var(--rule); border-radius:999px; padding:6px 12px;}
+  .chip b{color:var(--ink); font-weight:600}
+  .bar{height:8px; background:var(--paper); border:1px solid var(--rule);
+    border-radius:999px; overflow:hidden; margin:18px 0 8px;}
+  .bar i{display:block; height:100%; background:var(--teal);}
+  .nextline{font-family:Literata,Georgia,serif; font-size:19px; margin:4px 0 0;}
+  .secondary{display:flex; gap:18px; justify-content:center; margin-top:18px;}
+
+  .cluster{margin-bottom:22px}
+  .cname{font-size:13px; font-weight:600; color:var(--soft); margin:0 0 8px;}
+  .tline{display:flex; align-items:center; gap:12px; background:var(--card);
+    border:1px solid var(--rule); border-radius:12px; padding:13px 14px; margin-bottom:7px;}
+  .pip{flex:none; width:12px; height:12px; border-radius:50%; background:var(--rule);}
+  .tline p{margin:0; font-size:15px; flex:1}
+  .tline span{font-size:12px; color:var(--soft)}
+  .lv0 .pip{background:var(--l0)} .lv1 .pip{background:var(--l1)}
+  .lv2 .pip{background:var(--l2)} .lv3 .pip{background:var(--l3)}
+
+  .ticks{display:flex; gap:5px; margin-bottom:20px;}
+  .tick{height:3px; flex:1; background:var(--rule); border-radius:2px;}
+  .tick[data-on="1"]{background:var(--teal)}
+  .qcard{background:var(--card); border:1px solid var(--rule); border-radius:16px;
+    padding:24px 18px; margin-bottom:16px;}
+  .qtext{font-family:Literata,Georgia,serif; font-size:20px; line-height:1.55; margin:0 0 20px;}
+  .opt{display:flex; gap:12px; align-items:flex-start; width:100%; text-align:left;
+    background:none; border:0; border-top:1px solid var(--rule); padding:16px 2px;
+    font:inherit; font-size:17px; cursor:pointer; color:var(--ink);}
+  .opt:last-of-type{border-bottom:1px solid var(--rule)}
+  .dot{flex:none; width:21px; height:21px; border-radius:50%; border:1.5px solid #A9B7B2; margin-top:2px;}
+  .opt[data-on="1"] .dot{border-color:var(--teal); background:var(--teal);
+    box-shadow:inset 0 0 0 4px var(--card);}
+  .opt[data-on="1"]{color:var(--teal)}
+  .numin{width:100%; padding:18px 14px; border:1px solid var(--rule); border-radius:12px;
+    font-family:Literata,Georgia,serif; font-size:30px; text-align:center;
+    letter-spacing:.08em; background:var(--paper);}
+  .numin:focus{outline:2px solid var(--teal); outline-offset:1px; border-color:transparent}
+  .actions{display:flex; gap:10px; align-items:center}
+  .actions .btn{flex:1}
+
+  .big{font-family:Literata,Georgia,serif; font-size:52px; font-weight:600;
+    margin:12px 0 2px; color:var(--teal);}
+
+  .grid{display:grid; gap:10px}
+  .gcard{background:var(--card); border:1px solid var(--rule); border-radius:14px;
+    padding:18px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;}
+  .gcard b{font-family:Literata,Georgia,serif; font-size:21px; font-weight:600}
+  .subs{display:grid; gap:14px; margin-top:14px}
+  @media (min-width:760px){ .subs{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))} }
+  .sub-col{background:var(--card); border:1px solid var(--rule); border-radius:14px;
+    padding:12px; min-height:90px;}
+  .sub-col.over{border-color:var(--teal); background:#EAF2EF}
+  .sub-col h3{margin:0 0 4px; font-size:14px; font-weight:600}
+  .sub-col .topic{font-size:12px; color:var(--soft); margin:0 0 10px; line-height:1.35}
+  .pupil{background:var(--paper); border:1px solid var(--rule); border-radius:9px;
+    padding:10px 11px; margin-bottom:6px; font-size:14px; cursor:grab; user-select:none;}
+  .pupil.drag{opacity:.4}
+  .pupil.sel{border-color:var(--teal); box-shadow:inset 0 0 0 1px var(--teal)}
+  .movebar{display:flex; gap:8px; flex-wrap:wrap; margin-top:16px; align-items:center}
 </style>
 </head>
-<body>
-<div class="wrap" id="app"></div>
+<body><div class="wrap" id="app"></div>
 
 <script>
-/* ---------- ФОРМУЛЫ ----------
-   KaTeX грузится с трёх источников по очереди.
-   Если ни один не доступен — формулы показываются простым текстом,
-   но никогда сырым кодом.                                        */
-
-const KATEX_CDN = [
-  "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/",
-  "https://unpkg.com/katex@0.16.11/dist/",
-  "https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/"
-];
-let katexState = "loading";
-
+/* ================= ФОРМУЛЫ ================= */
+const KATEX_CDN=["https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/",
+ "https://unpkg.com/katex@0.16.11/dist/","https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/"];
+let katexState="loading";
 function loadKatex(i){
-  if(i >= KATEX_CDN.length){ katexState = "failed"; mathify(); return; }
-  const base = KATEX_CDN[i];
-  const css = document.createElement("link");
-  css.rel = "stylesheet"; css.href = base + "katex.min.css";
-  document.head.appendChild(css);
-  const s1 = document.createElement("script");
-  s1.src = base + "katex.min.js";
-  s1.onerror = () => loadKatex(i+1);
-  s1.onload = () => {
-    const s2 = document.createElement("script");
-    s2.src = base + "contrib/auto-render.min.js";
-    s2.onerror = () => loadKatex(i+1);
-    s2.onload = () => { katexState = "ready"; mathify(); };
-    document.head.appendChild(s2);
-  };
-  document.head.appendChild(s1);
+  if(i>=KATEX_CDN.length){katexState="failed";mathify();return;}
+  const b=KATEX_CDN[i];
+  const c=document.createElement("link");c.rel="stylesheet";c.href=b+"katex.min.css";document.head.appendChild(c);
+  const s=document.createElement("script");s.src=b+"katex.min.js";
+  s.onerror=()=>loadKatex(i+1);
+  s.onload=()=>{const a=document.createElement("script");a.src=b+"contrib/auto-render.min.js";
+    a.onerror=()=>loadKatex(i+1);a.onload=()=>{katexState="ready";mathify();};document.head.appendChild(a);};
+  document.head.appendChild(s);
 }
-
-function texToPlain(s){
-  return s
-    .replace(/(\d)\s*\\d?frac\{([^{}]*)\}\{([^{}]*)\}/g, "$1 $2/$3")
-    .replace(/\\d?frac\{([^{}]*)\}\{([^{}]*)\}/g, "$1/$2")
-    .replace(/\\left|\\right/g, "")
-    .replace(/\\cdots|\\ldots|\\dots/g, "…")
-    .replace(/\\cdot/g, "·")
-    .replace(/\\times/g, "×")
-    .replace(/\\text\{([^{}]*)\}/g, "$1")
-    .replace(/\\,|\\;|\\ /g, " ")
-    .replace(/\{,\}/g, ",")
-    .replace(/\^\{?2\}?/g, "²").replace(/\^\{?3\}?/g, "³").replace(/\^\{?4\}?/g, "⁴")
-    .replace(/[{}]/g, "")
-    .replace(/\\/g, "")
-    .trim();
-}
-
-function plainMath(root){
-  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-  const nodes = [];
-  while(walker.nextNode()) nodes.push(walker.currentNode);
-  nodes.forEach(n => {
-    if(n.nodeValue.indexOf("$") < 0) return;
-    n.nodeValue = n.nodeValue.replace(/\$([^$]+)\$/g, (m, inner) => texToPlain(inner));
-  });
-}
-
-function mathify(){
-  const root = document.getElementById("app");
-  if(!root) return;
-  if(katexState === "ready" && window.renderMathInElement){
-    try{
-      renderMathInElement(root, {
-        delimiters: [{left:"$$",right:"$$",display:true},{left:"$",right:"$",display:false}],
-        throwOnError: false
-      });
-      return;
-    }catch(e){ katexState = "failed"; }
-  }
-  if(katexState === "failed") plainMath(root);
-}
-
+function texToPlain(s){return s
+  .replace(/(\d)\s*\\d?frac\{([^{}]*)\}\{([^{}]*)\}/g,"$1 $2/$3")
+  .replace(/\\d?frac\{([^{}]*)\}\{([^{}]*)\}/g,"$1/$2")
+  .replace(/\\left|\\right/g,"").replace(/\\cdots|\\ldots|\\dots/g,"…")
+  .replace(/\\cdot/g,"·").replace(/\\times/g,"×")
+  .replace(/\\text\{([^{}]*)\}/g,"$1").replace(/\\,|\\;|\\ /g," ")
+  .replace(/\{,\}/g,",").replace(/\^\{?2\}?/g,"²").replace(/\^\{?3\}?/g,"³").replace(/\^\{?4\}?/g,"⁴")
+  .replace(/[{}]/g,"").replace(/\\/g,"").trim();}
+function plainMath(r){const w=document.createTreeWalker(r,NodeFilter.SHOW_TEXT),n=[];
+  while(w.nextNode())n.push(w.currentNode);
+  n.forEach(x=>{if(x.nodeValue.indexOf("$")<0)return;
+    x.nodeValue=x.nodeValue.replace(/\$([^$]+)\$/g,(m,i)=>texToPlain(i));});}
+function mathify(){const r=document.getElementById("app");if(!r)return;
+  if(katexState==="ready"&&window.renderMathInElement){
+    try{renderMathInElement(r,{delimiters:[{left:"$$",right:"$$",display:true},
+      {left:"$",right:"$",display:false}],throwOnError:false});return;}catch(e){katexState="failed";}}
+  if(katexState==="failed")plainMath(r);}
 loadKatex(0);
 
-/* ---------- словарь интерфейса ---------- */
-const T = {
-  kz: {
-    title:"MaxMath", login_sub:"Кодыңды және құпиясөзіңді енгіз",
-    code:"Код (5 сан)", pass:"Құпиясөз", enter:"Кіру",
-    bad_login:"Код немесе құпиясөз қате",
-    hello:"Сәлем", start_diag:"Диагностиканы бастау",
-    diag_sub:"Бұл баға емес. Қатеден қорықпа — ол тек нені бірге қайталау керегін көрсетеді.",
-    question:"Сұрақ", of:"/", answer:"Жауап беру", dont_know:"Түсінбедім",
-    your_answer:"Жауабың", num_hint:"Жауап — бүтін оң сан немесе нөл",
-    done_title:"Жарайсың",
-    done_sub:"Диагностика аяқталды. Нәтижелерді сабақта бірге қараймыз.",
-    tasks_done:"тапсырма орындалды", exit:"Шығу",
-    no_tasks:"Тапсырмалар әлі жүктелмеген. Мұғалімге айт.",
-    net_err:"Байланыс қатесі. Қайталап көр."
-  },
-  ru: {
-    title:"MaxMath", login_sub:"Введи свой код и пароль",
-    code:"Код (5 цифр)", pass:"Пароль", enter:"Войти",
-    bad_login:"Неверный код или пароль",
-    hello:"Привет", start_diag:"Начать диагностику",
-    diag_sub:"Это не оценка. Не бойся ошибиться — ошибки только показывают, что мы повторим вместе.",
-    question:"Вопрос", of:"из", answer:"Ответить", dont_know:"Не понял",
-    your_answer:"Твой ответ", num_hint:"Ответ — целое положительное число или ноль",
-    done_title:"Молодец",
-    done_sub:"Диагностика пройдена. Результаты разберём вместе на занятии.",
-    tasks_done:"задач выполнено", exit:"Выйти",
-    no_tasks:"Задачи ещё не загружены. Скажи учителю.",
-    net_err:"Ошибка связи. Попробуй ещё раз."
-  }
-};
+/* ================= СЛОВАРЬ ================= */
+const T={
+ kz:{login_sub:"Кодыңды және құпиясөзіңді енгіз",code:"Код (5 сан)",pass:"Құпиясөз",
+  enter:"Кіру",bad:"Код немесе құпиясөз қате",net:"Байланыс қатесі. Қайталап көр.",
+  hi:"Сәлем",cont:"Жалғастыру",start_diag:"Диагностиканы бастау",
+  diag_sub:"Бұл баға емес. Қатеден қорықпа — ол нені бірге қайталау керегін көрсетеді.",
+  topics_done:"тақырып ашылды",days:"белсенді күн",next:"Келесі тақырып",
+  map:"Карта",exit:"Шығу",q:"Сұрақ",of:"/",ans:"Жауап беру",dk:"Түсінбедім",
+  your:"Жауабың",numhint:"Жауап — бүтін оң сан немесе нөл",
+  done:"Жарайсың",done_sub:"Нәтижелерді сабақта бірге қараймыз.",tasks:"тапсырма",
+  no_tasks:"Тапсырмалар әлі жүктелмеген. Мұғалімге айт.",
+  map_title:"Тақырыптар картасы",not_yet:"тексерілмеген",back:"Артқа"},
+ ru:{login_sub:"Введи свой код и пароль",code:"Код (5 цифр)",pass:"Пароль",
+  enter:"Войти",bad:"Неверный код или пароль",net:"Ошибка связи. Попробуй ещё раз.",
+  hi:"Привет",cont:"Продолжить",start_diag:"Начать диагностику",
+  diag_sub:"Это не оценка. Не бойся ошибиться — ошибки показывают, что повторить вместе.",
+  topics_done:"тем открыто",days:"активных дней",next:"Следующая тема",
+  map:"Карта",exit:"Выйти",q:"Вопрос",of:"из",ans:"Ответить",dk:"Не понял",
+  your:"Твой ответ",numhint:"Ответ — целое положительное число или ноль",
+  done:"Молодец",done_sub:"Результаты разберём вместе на занятии.",tasks:"задач",
+  no_tasks:"Задачи ещё не загружены. Скажи учителю.",
+  map_title:"Карта тем",not_yet:"не проверялась",back:"Назад"}};
 
-/* ---------- состояние ---------- */
-let db = null, lang = "kz", student = null, adminPin = null;
-let diag = null; // {queue, i, answered, session, tStart}
-const $ = (id) => document.getElementById(id);
-const app = document.getElementById("app");
-const t = (k) => (T[lang] && T[lang][k]) || T.ru[k] || k;
+/* ================= СОСТОЯНИЕ ================= */
+let db=null,lang="kz",student=null,adminPin=null,diag=null;
+const $=id=>document.getElementById(id), app=document.getElementById("app");
+const t=k=>(T[lang]&&T[lang][k])||T.ru[k]||k;
+const esc=s=>String(s??"").replace(/[<>&"]/g,c=>({"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;"}[c]));
 
 function boot(){
-  const c = window.MAXMATH_CONFIG || {};
-  if(!c.SUPABASE_URL || c.SUPABASE_URL.startsWith("ВСТАВЬ")){
-    app.innerHTML = "<h1>MaxMath</h1><p class='err'>Файл config.js не заполнен: нужны URL и ключ из Supabase.</p>";
-    return;
-  }
-  db = supabase.createClient(c.SUPABASE_URL, c.SUPABASE_KEY);
+  const c=window.MAXMATH_CONFIG||{};
+  if(!c.SUPABASE_URL||c.SUPABASE_URL.startsWith("ВСТАВЬ")){
+    app.innerHTML="<h1>MaxMath</h1><p class='err'>config.js не заполнен.</p>";return;}
+  db=supabase.createClient(c.SUPABASE_URL,c.SUPABASE_KEY);
+  const s=sessionStorage.getItem("mm_student");
+  if(s){try{student=JSON.parse(s);lang=student.lang==="kz"?"kz":"ru";screenHome();return;}catch(e){}}
   screenLogin();
 }
+function langRow(){return `<div class="langrow">
+  <button data-on="${lang==='kz'?1:0}" onclick="setLang('kz')">Қаз</button>
+  <button data-on="${lang==='ru'?1:0}" onclick="setLang('ru')">Рус</button></div>`;}
+function setLang(l){lang=l;if(student)screenHome();else if(!adminPin)screenLogin();}
 
-function langRow(){
-  return `<div class="langrow">
-    <button data-on="${lang==='kz'?1:0}" onclick="setLang('kz')">Қаз</button>
-    <button data-on="${lang==='ru'?1:0}" onclick="setLang('ru')">Рус</button>
-  </div>`;
-}
-function setLang(l){ lang = l; if(!student && !adminPin) screenLogin(); else if(student && !diag) screenStudent(); }
-
-/* ---------- вход ---------- */
+/* ================= ВХОД ================= */
 function screenLogin(){
-  student = null; adminPin = null; diag = null;
-  app.innerHTML = `
-    ${langRow()}
-    <h1>${t("title")}</h1>
-    <p class="sub">${t("login_sub")}</p>
-    <label>${t("code")}</label>
-    <input id="f_code" inputmode="numeric" maxlength="5" autocomplete="off">
-    <label>${t("pass")}</label>
-    <input id="f_pass" type="password" autocomplete="off">
-    <button class="btn" onclick="doLogin()">${t("enter")}</button>
+  student=null;adminPin=null;diag=null;sessionStorage.removeItem("mm_student");
+  app.innerHTML=`${langRow()}<h1>MaxMath</h1><p class="sub">${t("login_sub")}</p>
+    <label>${t("code")}</label><input id="f_code" inputmode="numeric" maxlength="5" autocomplete="off">
+    <label>${t("pass")}</label><input id="f_pass" type="password" autocomplete="off">
+    <div style="margin-top:22px"><button class="btn" onclick="doLogin()">${t("enter")}</button></div>
     <p class="err" id="msg"></p>`;
+  $("f_pass").addEventListener("keydown",e=>{if(e.key==="Enter")doLogin();});
 }
-
 async function doLogin(){
-  const code = $("f_code").value.trim(), pass = $("f_pass").value;
-  $("msg").textContent = "";
+  const code=$("f_code").value.trim(),pass=$("f_pass").value;$("msg").textContent="";
   try{
-    const r = await db.rpc("login_student", { p_code: code, p_pass: pass });
-    if(r.data){
-      student = r.data; student.code = code;
-      lang = student.lang === "kz" ? "kz" : "ru";
-      screenStudent(); return;
-    }
-    const a = await db.rpc("check_admin", { p_pin: code });
-    if(a.data === true){ adminPin = code; screenAdmin(); return; }
-    $("msg").textContent = t("bad_login");
-  }catch(e){ $("msg").textContent = t("net_err"); }
+    const r=await db.rpc("login_student",{p_code:code,p_pass:pass});
+    if(r.data){student=r.data;student.code=code;lang=student.lang==="kz"?"kz":"ru";
+      sessionStorage.setItem("mm_student",JSON.stringify(student));screenHome();return;}
+    const a=await db.rpc("check_admin",{p_pin:code});
+    if(a.data===true){adminPin=code;screenGroups();return;}
+    $("msg").textContent=t("bad");
+  }catch(e){$("msg").textContent=t("net");}
 }
 
-/* ---------- ученик ---------- */
-async function screenStudent(){
-  let nm = "";
-  try{
-    const r = await db.rpc("login_student", { p_code: student.code, p_pass: "" });
-  }catch(e){}
-  app.innerHTML = `
-    ${langRow()}
-    <h1>${t("hello")}!</h1>
-    <p class="sub">${t("diag_sub")}</p>
-    <button class="btn" onclick="startDiag()">${t("start_diag")}</button>
-    <p class="err" id="msg"></p>
-    <p style="margin-top:34px"><button class="ghost" onclick="screenLogin()">${t("exit")}</button></p>`;
+/* ================= ГЛАВНЫЙ ЭКРАН УЧЕНИКА ================= */
+async function screenHome(){
+  app.innerHTML=`<p class="sub">…</p>`;
+  let h={};
+  try{const r=await db.rpc("student_home",{p_id:student.id,p_lang:lang});h=r.data||{};}
+  catch(e){app.innerHTML=`<p class="err">${t("net")}</p>`;return;}
+  const total=h.total||0,done=h.done||0,pct=total?Math.round(done/total*100):0;
+  const fresh=(h.measured||0)===0;
+  app.innerHTML=`${langRow()}
+    <div class="hero">
+      <h1>${t("hi")}, ${esc(h.name||"")}</h1>
+      <div class="bar"><i style="width:${pct}%"></i></div>
+      <div class="chips">
+        <span class="chip"><b>${done}</b> / ${total} ${t("topics_done")}</span>
+        <span class="chip"><b>${h.days||0}</b> ${t("days")}</span></div>
+      ${h.next?`<p class="note" style="margin-top:16px">${t("next")}</p>
+                <p class="nextline">${esc(h.next)}</p>`:""}
+    </div>
+    ${fresh?`<p class="sub">${t("diag_sub")}</p>`:""}
+    <button class="btn" onclick="startDiag()">${fresh?t("start_diag"):t("cont")}</button>
+    <div class="secondary">
+      <button class="link" onclick="screenMap()">${t("map")}</button>
+      <button class="link" onclick="screenLogin()">${t("exit")}</button></div>`;
 }
 
+/* ================= КАРТА ТЕМ ================= */
+async function screenMap(){
+  app.innerHTML=`<p class="sub">…</p>`;
+  let rows=[];
+  try{const r=await db.rpc("student_map",{p_id:student.id,p_lang:lang});rows=r.data||[];}
+  catch(e){app.innerHTML=`<p class="err">${t("net")}</p>`;return;}
+  const by={};rows.forEach(x=>{(by[x.cluster]=by[x.cluster]||[]).push(x);});
+  let html=`<h1>${t("map_title")}</h1><p class="sub"></p>`;
+  for(const c in by){
+    html+=`<div class="cluster"><p class="cname">${esc(c)}</p>`;
+    by[c].forEach(x=>{
+      html+=`<div class="tline ${x.level<0?"":"lv"+x.level}"><span class="pip"></span>
+        <p>${esc(x.name)}</p>
+        <span>${x.level<0?t("not_yet"):x.level+"/3"}</span></div>`;});
+    html+=`</div>`;}
+  html+=`<button class="ghost" onclick="screenHome()">← ${t("back")}</button>`;
+  app.innerHTML=html;
+}
+
+/* ================= ДИАГНОСТИКА ================= */
 async function startDiag(){
-  $("msg").textContent = "";
   try{
-    const r = await db.rpc("get_diag_map");
-    const rows = r.data || [];
-    if(!rows.length){ $("msg").textContent = t("no_tasks"); return; }
-    // группируем по темам, в теме — по уровням
-    const topics = {};
-    rows.forEach(x => {
-      topics[x.topic_id] = topics[x.topic_id] || { ord:x.ord, byLevel:{} };
-      topics[x.topic_id].byLevel[x.level] = x.task_id;
-    });
-    const order = Object.values(topics).sort((a,b)=>a.ord-b.ord);
-    diag = {
-      plan: order, ti: 0, phase: "mid", answered: 0,
-      total: order.length * 2,
-      session: "diag-" + new Date().toISOString().slice(0,10),
-      tStart: 0
-    };
+    const r=await db.rpc("get_diag_map");const rows=r.data||[];
+    if(!rows.length){alert(t("no_tasks"));return;}
+    const tp={};
+    rows.forEach(x=>{tp[x.topic_id]=tp[x.topic_id]||{ord:x.ord,byLevel:{}};
+      tp[x.topic_id].byLevel[x.level]=x.task_id;});
+    const order=Object.values(tp).sort((a,b)=>a.ord-b.ord);
+    diag={plan:order,ti:0,phase:"mid",answered:0,total:order.length*2,
+      session:"diag-"+new Date().toISOString().slice(0,10),tStart:0};
     nextTask();
-  }catch(e){ $("msg").textContent = t("net_err"); }
+  }catch(e){app.innerHTML=`<p class="err">${t("net")}</p>`;}
 }
-
-function currentTaskId(){
-  const tp = diag.plan[diag.ti], L = tp.byLevel;
-  if(diag.phase === "mid")  return L[2] ?? L[1] ?? L[3];
-  if(diag.phase === "hard") return L[3] ?? null;
-  return L[1] ?? null; // easy
-}
-
+function currentTaskId(){const L=diag.plan[diag.ti].byLevel;
+  if(diag.phase==="mid")return L[2]??L[1]??L[3];
+  if(diag.phase==="hard")return L[3]??null;return L[1]??null;}
 async function nextTask(){
-  const id = currentTaskId();
-  if(id == null){ advanceTopic(); return; }
-  try{
-    const r = await db.rpc("get_task", { p_task_id: id, p_lang: lang });
-    renderTask(id, r.data);
-  }catch(e){ app.innerHTML = `<p class="err">${t("net_err")}</p>`; }
+  const id=currentTaskId();if(id==null){advanceTopic();return;}
+  try{const r=await db.rpc("get_task",{p_task_id:id,p_lang:lang});renderTask(id,r.data);}
+  catch(e){app.innerHTML=`<p class="err">${t("net")}</p>`;}
 }
-
-function renderTask(id, q){
-  diag.tStart = Date.now();
-  let picked = null;
-  const isNum = q.answer_type === "number";
-  const ticks = diag.plan.map((_,i)=>`<div class="tick" data-on="${i<diag.ti?1:0}"></div>`).join("");
-
-  const body = isNum
-    ? `<input class="numin" id="f_num" type="text" inputmode="numeric"
-             autocomplete="off" placeholder="${t("your_answer")}">
-       <p class="note">${t("num_hint")}</p>`
-    : q.options.map(o=>`
-        <button class="opt" data-i="${o.i}" data-on="0" onclick="pick(${o.i})">
-          <span class="dot"></span><span>${o.t}</span>
-        </button>`).join("");
-
-  app.innerHTML = `
-    <div class="ticks">${ticks}</div>
-    <p class="sub">${t("question")} ${diag.answered+1} ${t("of")} ${diag.total}</p>
-    <div class="qcard">
-      <p class="qtext">${q.q}</p>
-      ${body}
-    </div>
-    <div class="row">
-      <button class="btn" id="b_go" disabled onclick="send(${id}, false)">${t("answer")}</button>
-      <button class="ghost" onclick="send(${id}, true)">${t("dont_know")}</button>
-    </div>`;
+function renderTask(id,q){
+  diag.tStart=Date.now();let picked=null;
+  const isNum=q.answer_type==="number";
+  const ticks=diag.plan.map((_,i)=>`<div class="tick" data-on="${i<diag.ti?1:0}"></div>`).join("");
+  const body=isNum
+    ? `<input class="numin" id="f_num" type="text" inputmode="numeric" autocomplete="off" placeholder="${t("your")}">
+       <p class="note">${t("numhint")}</p>`
+    : q.options.map(o=>`<button class="opt" data-i="${o.i}" data-on="0" onclick="pick(${o.i})">
+         <span class="dot"></span><span>${o.t}</span></button>`).join("");
+  app.innerHTML=`<div class="ticks">${ticks}</div>
+    <p class="sub" style="margin-bottom:14px">${t("q")} ${diag.answered+1} ${t("of")} ${diag.total}</p>
+    <div class="qcard"><p class="qtext">${q.q}</p>${body}</div>
+    <div class="actions">
+      <button class="btn" id="b_go" disabled onclick="send(${id},false)">${t("ans")}</button>
+      <button class="ghost" onclick="send(${id},true)">${t("dk")}</button></div>`;
   mathify();
-
-  if(isNum){
-    const inp = $("f_num");
-    inp.addEventListener("input", ()=>{
-      inp.value = inp.value.replace(/[^0-9]/g, "");
-      $("b_go").disabled = inp.value === "";
-    });
-    inp.addEventListener("keydown", e=>{
-      if(e.key === "Enter" && inp.value !== "") send(id, false);
-    });
-    inp.focus();
-  }
-
-  window.pick = (i)=>{
-    picked = i;
-    document.querySelectorAll(".opt").forEach(b=>b.dataset.on = (+b.dataset.i===i)?1:0);
-    $("b_go").disabled = false;
-  };
-
-  window.send = async (taskId, gaveUp)=>{
-    const secs = Math.round((Date.now()-diag.tStart)/1000);
-    $("b_go").disabled = true;
-    let num = null;
-    if(isNum && !gaveUp){
-      const v = $("f_num").value.trim();
-      if(v === ""){ $("b_go").disabled = false; return; }
-      num = parseInt(v, 10);
-    }
+  if(isNum){const inp=$("f_num");
+    inp.addEventListener("input",()=>{inp.value=inp.value.replace(/[^0-9]/g,"");
+      $("b_go").disabled=inp.value==="";});
+    inp.addEventListener("keydown",e=>{if(e.key==="Enter"&&inp.value!=="")send(id,false);});
+    inp.focus();}
+  window.pick=i=>{picked=i;
+    document.querySelectorAll(".opt").forEach(b=>b.dataset.on=(+b.dataset.i===i)?1:0);
+    $("b_go").disabled=false;};
+  window.send=async(taskId,gaveUp)=>{
+    const secs=Math.round((Date.now()-diag.tStart)/1000);
+    $("b_go").disabled=true;let num=null;
+    if(isNum&&!gaveUp){const v=$("f_num").value.trim();
+      if(v===""){$("b_go").disabled=false;return;}num=parseInt(v,10);}
     try{
-      const r = await db.rpc("submit_answer", {
-        p_student: student.id, p_task: taskId, p_session: diag.session,
-        p_chosen: (isNum || gaveUp) ? null : picked,
-        p_num: num, p_gave_up: gaveUp, p_seconds: secs
-      });
+      const r=await db.rpc("submit_answer",{p_student:student.id,p_task:taskId,
+        p_session:diag.session,p_chosen:(isNum||gaveUp)?null:picked,p_num:num,
+        p_gave_up:gaveUp,p_seconds:secs});
       diag.answered++;
-      const correct = r.data && r.data.correct === true;
-      if(diag.phase === "mid"){
-        diag.phase = correct ? "hard" : "easy";
-        nextTask();
-      } else {
-        advanceTopic();
-      }
-    }catch(e){ app.innerHTML = `<p class="err">${t("net_err")}</p>`; }
-  };
+      const ok=r.data&&r.data.correct===true;
+      if(diag.phase==="mid"){diag.phase=ok?"hard":"easy";nextTask();}else advanceTopic();
+    }catch(e){app.innerHTML=`<p class="err">${t("net")}</p>`;}};
 }
-
-function advanceTopic(){
-  diag.ti++; diag.phase = "mid";
-  if(diag.ti >= diag.plan.length) screenDone();
-  else nextTask();
-}
-
+function advanceTopic(){diag.ti++;diag.phase="mid";
+  if(diag.ti>=diag.plan.length)screenDone();else nextTask();}
 function screenDone(){
-  const n = diag.answered; diag = null;
-  app.innerHTML = `
-    <h1>${t("done_title")}!</h1>
-    <p class="sub">${t("done_sub")}</p>
-    <div class="card" style="text-align:center">
-      <div class="big">${n}</div>
-      <div class="sub" style="margin:0">${t("tasks_done")}</div>
-    </div>
-    <button class="ghost" onclick="screenLogin()">${t("exit")}</button>`;
+  const n=diag.answered;diag=null;
+  app.innerHTML=`<h1>${t("done")}!</h1><p class="sub">${t("done_sub")}</p>
+    <div class="hero" style="text-align:center">
+      <div class="big">${n}</div><div class="note">${t("tasks")}</div></div>
+    <button class="btn" onclick="screenHome()">${t("cont")}</button>`;
 }
 
-/* ---------- админ ---------- */
-async function screenAdmin(){
-  app.innerHTML = `
-    <h1>Кабинет преподавателя</h1>
-    <div class="row" style="margin-bottom:6px">
+/* ================= АДМИН: ГРУППЫ ================= */
+async function screenGroups(){
+  app.innerHTML=`<h1>Группы</h1><p class="sub">…</p>`;
+  let gs=[];
+  try{const r=await db.rpc("list_groups",{p_pin:adminPin});gs=r.data||[];}
+  catch(e){app.innerHTML=`<p class="err">Ошибка связи.</p>`;return;}
+  app.innerHTML=`<h1>Группы</h1>
+    <div class="grid">${gs.map(g=>`
+      <div class="gcard" onclick="screenGroup('${esc(g.grp)}')">
+        <b>${esc(g.grp)}</b><span class="note">${g.n} учеников →</span></div>`).join("")}</div>
+    <div class="movebar">
       <button class="ghost" onclick="exportCsv()">Выгрузить ответы (CSV)</button>
-      <button class="ghost" onclick="screenLogin()">Выйти</button>
-    </div>
-    <p class="ok" id="msg"></p>
+      <button class="ghost" onclick="screenLogin()">Выйти</button></div>
+    <p class="note" id="msg"></p>`;
+}
 
-    <h2>Добавить ученика</h2>
-    <div class="card">
-      <div class="grid2">
-        <div><label>Имя</label><input id="a_name"></div>
-        <div><label>Фамилия</label><input id="a_surname"></div>
-        <div><label>Код (5 цифр)</label><input id="a_code" maxlength="5" inputmode="numeric"></div>
-        <div><label>Пароль</label><input id="a_pass"></div>
-        <div><label>Класс</label>
-          <select id="a_grade"><option value="5">5</option><option value="6">6</option></select></div>
-        <div><label>Язык</label>
-          <select id="a_lang"><option value="kz">Казахский</option><option value="ru">Русский</option></select></div>
-        <div><label>Схватывает (1–3)</label>
-          <select id="a_grasp"><option>1</option><option selected>2</option><option>3</option></select></div>
-        <div><label>Ведёт</label>
-          <select id="a_mentor"><option value="main">Я</option><option value="assistant">Помощник</option></select></div>
+/* ================= АДМИН: ГРУППА И ПОДГРУППЫ ================= */
+let roster=[],curGrp=null,subs=null,allGroups=[],selected=null,lastMove=null;
+
+async function screenGroup(g){
+  curGrp=g;subs=null;selected=null;
+  app.innerHTML=`<p class="sub">…</p>`;
+  try{
+    const [r1,r2]=await Promise.all([
+      db.rpc("group_roster",{p_pin:adminPin,p_grp:g}),
+      db.rpc("list_groups",{p_pin:adminPin})]);
+    roster=r1.data||[];allGroups=(r2.data||[]).map(x=>x.grp);
+  }catch(e){app.innerHTML=`<p class="err">Ошибка связи.</p>`;return;}
+  drawGroup();
+}
+function buildSubs(){
+  const byTopic={};
+  roster.forEach(p=>{const k=p.next_code||"—";(byTopic[k]=byTopic[k]||[]).push(p);});
+  const keys=Object.keys(byTopic).sort((a,b)=>byTopic[b].length-byTopic[a].length);
+  subs=keys.slice(0,3).map(k=>({
+    title:k==="—"?"Все темы закрыты":"Тема "+k,
+    topic:byTopic[k][0].next_name||"",
+    list:byTopic[k].slice()}));
+  const extra=[];keys.slice(3).forEach(k=>extra.push(...byTopic[k]));
+  if(extra.length)subs.push({title:"Отдельно",topic:"разные темы, точечно",list:extra});
+  if(!subs.length)subs=[{title:"Группа",topic:"",list:roster.slice()}];
+}
+function drawGroup(){
+  let html=`<button class="ghost" onclick="screenGroups()">← Группы</button>
+    <h1 style="margin-top:14px">${esc(curGrp)}</h1>
+    <p class="sub">${roster.length} учеников</p>`;
+  if(!subs){
+    html+=`<button class="btn" onclick="startLesson()">Начать урок</button>
+      <p class="note" style="margin-top:14px">Система разобьёт группу по ближайшей
+      неосвоенной теме. Дальше перетащи кого нужно вручную.</p>`;
+  }else{
+    html+=`<div class="subs">`;
+    subs.forEach((s,i)=>{
+      html+=`<div class="sub-col" data-sub="${i}"
+        ondragover="dOver(event,${i})" ondragleave="dLeave(${i})" ondrop="dDrop(event,${i})"
+        onclick="colTap(${i})">
+        <h3>${esc(s.title)}</h3><p class="topic">${esc(s.topic)}</p>
+        ${s.list.map(p=>`<div class="pupil${selected===p.code?" sel":""}" draggable="true"
+            data-code="${p.code}" ondragstart="dStart(event,'${p.code}')" ondragend="dEnd(event)"
+            onclick="pupilTap(event,'${p.code}')">${esc(p.name)}</div>`).join("")}
+      </div>`;});
+    html+=`</div>
+      <h2>Перевести в другую группу</h2>
+      <div class="movebar">
+        ${allGroups.filter(g=>g!==curGrp).map(g=>`
+          <button class="ghost" ondragover="event.preventDefault()"
+            ondrop="moveGroup(event,'${esc(g)}')"
+            onclick="moveGroup(null,'${esc(g)}')">${esc(g)}</button>`).join("")}
+        <button class="ghost" onclick="undoMove()">Отменить</button>
       </div>
-      <button class="btn" onclick="addStudent()">Добавить</button>
-    </div>
-
-    <h2>Ученики</h2>
-    <div id="students">Загружаю…</div>`;
-  loadStudents();
+      <p class="note">Перетащи ученика — или нажми на него, потом на подгруппу или группу.</p>
+      <p class="note" id="msg"></p>`;
+  }
+  app.innerHTML=html;
 }
-
-async function loadStudents(){
+function startLesson(){buildSubs();drawGroup();}
+function findPupil(c){for(const s of subs){const p=s.list.find(x=>x.code===c);if(p)return p;}return null;}
+function removePupil(c){subs.forEach(s=>{const i=s.list.findIndex(x=>x.code===c);if(i>=0)s.list.splice(i,1);});}
+function dStart(e,c){selected=c;e.dataTransfer.setData("text/plain",c);e.target.classList.add("drag");}
+function dEnd(e){e.target.classList.remove("drag");}
+function dOver(e,i){e.preventDefault();const el=document.querySelector(`[data-sub="${i}"]`);if(el)el.classList.add("over");}
+function dLeave(i){const el=document.querySelector(`[data-sub="${i}"]`);if(el)el.classList.remove("over");}
+function dDrop(e,i){e.preventDefault();
+  const c=e.dataTransfer.getData("text/plain")||selected;if(!c)return;
+  const p=findPupil(c);if(!p)return;
+  removePupil(c);subs[i].list.push(p);selected=null;drawGroup();}
+function pupilTap(e,c){e.stopPropagation();selected=(selected===c?null:c);drawGroup();}
+function colTap(i){if(!selected)return;const p=findPupil(selected);if(!p)return;
+  removePupil(selected);subs[i].list.push(p);selected=null;drawGroup();}
+async function moveGroup(e,g){
+  if(e)e.preventDefault();
+  const c=e?(e.dataTransfer.getData("text/plain")||selected):selected;
+  if(!c){if($("msg"))$("msg").textContent="Сначала выбери ученика.";return;}
+  const p=findPupil(c);if(!p)return;
   try{
-    const r = await db.rpc("list_students", { p_pin: adminPin });
-    const rows = r.data || [];
-    if(!rows.length){ $("students").innerHTML = "<p class='sub'>Пока никого нет.</p>"; return; }
-    $("students").innerHTML = `<table>
-      <tr><th>Код</th><th>Имя</th><th>Кл</th><th>Язык</th><th>Схв</th><th>Ведёт</th><th></th></tr>
-      ${rows.map(s=>`<tr data-off="${s.active?0:1}">
-        <td>${s.code}</td><td>${s.name}</td><td>${s.grade}</td>
-        <td>${s.lang==="kz"?"каз":"рус"}</td><td>${s.grasp??""}</td>
-        <td>${s.mentor==="main"?"я":"пом."}</td>
-        <td>${s.active?`<button class="ghost" onclick="deact('${s.code}')">откл.</button>`:"выкл"}</td>
-      </tr>`).join("")}
-    </table>`;
-  }catch(e){ $("students").innerHTML = "<p class='err'>Не удалось загрузить список.</p>"; }
+    const r=await db.rpc("set_group",{p_pin:adminPin,p_code:c,p_grp:g});
+    if(r.data!=="ok"){if($("msg"))$("msg").textContent="Не удалось перевести.";return;}
+    lastMove={code:c,from:curGrp};
+    removePupil(c);roster=roster.filter(x=>x.code!==c);selected=null;drawGroup();
+    if($("msg"))$("msg").textContent=`${p.name} → ${g}`;
+  }catch(err){if($("msg"))$("msg").textContent="Ошибка связи.";}
+}
+async function undoMove(){
+  if(!lastMove)return;
+  try{await db.rpc("set_group",{p_pin:adminPin,p_code:lastMove.code,p_grp:lastMove.from});
+    const g=lastMove.from;lastMove=null;screenGroup(g);}catch(e){}
 }
 
-async function addStudent(){
-  $("msg").textContent = "";
-  const name = ($("a_name").value.trim()+" "+$("a_surname").value.trim()).trim();
-  const code = $("a_code").value.trim(), pass = $("a_pass").value;
-  if(!/^[0-9]{5}$/.test(code)){ $("msg").textContent = "Код должен быть из 5 цифр"; return; }
-  if(!name || !pass){ $("msg").textContent = "Заполни имя и пароль"; return; }
-  try{
-    const r = await db.rpc("add_student", {
-      p_pin: adminPin, p_code: code, p_pass: pass, p_name: name,
-      p_grade: +$("a_grade").value, p_lang: $("a_lang").value,
-      p_grasp: +$("a_grasp").value, p_mentor: $("a_mentor").value
-    });
-    $("msg").textContent = r.data === "ok" ? "Добавлен: " + name : (r.data || "ошибка");
-    if(r.data === "ok"){ ["a_name","a_surname","a_code","a_pass"].forEach(i=>$(i).value=""); loadStudents(); }
-  }catch(e){ $("msg").textContent = "Ошибка связи"; }
-}
-
-async function deact(code){
-  try{ await db.rpc("deactivate_student", { p_pin: adminPin, p_code: code }); loadStudents(); }
-  catch(e){}
-}
-
+/* ================= ВЫГРУЗКА ================= */
 async function exportCsv(){
-  $("msg").textContent = "Готовлю выгрузку…";
+  const m=$("msg");if(m)m.textContent="Готовлю выгрузку…";
   try{
-    const r = await db.rpc("export_answers", { p_pin: adminPin });
-    const rows = r.data || [];
-    if(!rows.length){ $("msg").textContent = "Ответов пока нет."; return; }
-    const head = ["код","имя","класс","язык","схватывает","ведёт","сессия",
-      "тема","название_темы","уровень","тип","ответ","не_понял","верно","секунды","код_ошибки","время"];
-    const csv = "\uFEFF" + head.join(";") + "\n" + rows.map(x=>[
-      x.code, x.name, x.grade, x.lang, x.grasp??"", x.mentor, x.session,
-      x.topic??"", x.topic_name??"", x.level, x.answer_type??"", x.num_answer??"",
-      x.gave_up?"да":"нет", x.correct?"да":"нет", x.seconds??"",
-      x.error_code??"", x.created_at
-    ].join(";")).join("\n");
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(new Blob([csv], {type:"text/csv;charset=utf-8"}));
-    a.download = "maxmath-otvety.csv";
-    a.click();
-    $("msg").textContent = "Файл скачан.";
-  }catch(e){ $("msg").textContent = "Ошибка выгрузки."; }
+    const r=await db.rpc("export_answers",{p_pin:adminPin});
+    const rows=r.data||[];
+    if(!rows.length){if(m)m.textContent="Ответов пока нет.";return;}
+    const head=["код","имя","класс","язык","схватывает","ведёт","сессия","тема","название_темы",
+      "уровень","тип","ответ","не_понял","верно","секунды","код_ошибки","время"];
+    const csv="\uFEFF"+head.join(";")+"\n"+rows.map(x=>[
+      x.code,x.name,x.grade,x.lang,x.grasp??"",x.mentor,x.session,x.topic??"",x.topic_name??"",
+      x.level,x.answer_type??"",x.num_answer??"",x.gave_up?"да":"нет",x.correct?"да":"нет",
+      x.seconds??"",x.error_code??"",x.created_at].join(";")).join("\n");
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
+    a.download="maxmath-otvety.csv";a.click();
+    if(m)m.textContent="Файл скачан.";
+  }catch(e){if(m)m.textContent="Ошибка выгрузки.";}
 }
 
 boot();
