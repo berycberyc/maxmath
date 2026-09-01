@@ -52,6 +52,10 @@
   .opt[data-on="1"] .dot{border-color:var(--blue);background:var(--blue);
     box-shadow:inset 0 0 0 3.5px var(--card);}
   .opt[data-on="1"]{color:var(--blue);}
+  .numin{width:100%;padding:16px 14px;border:1px solid var(--rule);border-radius:10px;
+    font-family:'PT Serif',Georgia,serif;font-size:28px;text-align:center;
+    letter-spacing:.08em;background:var(--paper);color:var(--ink);}
+  .numin:focus{outline:2px solid var(--blue);outline-offset:1px;border-color:transparent;}
   .row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
 
   table{width:100%;border-collapse:collapse;font-size:14px;margin-top:14px;}
@@ -153,6 +157,7 @@ const T = {
     hello:"Сәлем", start_diag:"Диагностиканы бастау",
     diag_sub:"Бұл баға емес. Қатеден қорықпа — ол тек нені бірге қайталау керегін көрсетеді.",
     question:"Сұрақ", of:"/", answer:"Жауап беру", dont_know:"Түсінбедім",
+    your_answer:"Жауабың", num_hint:"Жауап — бүтін оң сан немесе нөл",
     done_title:"Жарайсың",
     done_sub:"Диагностика аяқталды. Нәтижелерді сабақта бірге қараймыз.",
     tasks_done:"тапсырма орындалды", exit:"Шығу",
@@ -166,6 +171,7 @@ const T = {
     hello:"Привет", start_diag:"Начать диагностику",
     diag_sub:"Это не оценка. Не бойся ошибиться — ошибки только показывают, что мы повторим вместе.",
     question:"Вопрос", of:"из", answer:"Ответить", dont_know:"Не понял",
+    your_answer:"Твой ответ", num_hint:"Ответ — целое положительное число или ноль",
     done_title:"Молодец",
     done_sub:"Диагностика пройдена. Результаты разберём вместе на занятии.",
     tasks_done:"задач выполнено", exit:"Выйти",
@@ -287,34 +293,63 @@ async function nextTask(){
 function renderTask(id, q){
   diag.tStart = Date.now();
   let picked = null;
+  const isNum = q.answer_type === "number";
   const ticks = diag.plan.map((_,i)=>`<div class="tick" data-on="${i<diag.ti?1:0}"></div>`).join("");
+
+  const body = isNum
+    ? `<input class="numin" id="f_num" type="text" inputmode="numeric"
+             autocomplete="off" placeholder="${t("your_answer")}">
+       <p class="note">${t("num_hint")}</p>`
+    : q.options.map(o=>`
+        <button class="opt" data-i="${o.i}" data-on="0" onclick="pick(${o.i})">
+          <span class="dot"></span><span>${o.t}</span>
+        </button>`).join("");
+
   app.innerHTML = `
     <div class="ticks">${ticks}</div>
     <p class="sub">${t("question")} ${diag.answered+1} ${t("of")} ${diag.total}</p>
     <div class="qcard">
       <p class="qtext">${q.q}</p>
-      ${q.options.map((o,i)=>`
-        <button class="opt" data-i="${i}" data-on="0" onclick="pick(${i})">
-          <span class="dot"></span><span>${o}</span>
-        </button>`).join("")}
+      ${body}
     </div>
     <div class="row">
       <button class="btn" id="b_go" disabled onclick="send(${id}, false)">${t("answer")}</button>
       <button class="ghost" onclick="send(${id}, true)">${t("dont_know")}</button>
     </div>`;
   mathify();
+
+  if(isNum){
+    const inp = $("f_num");
+    inp.addEventListener("input", ()=>{
+      inp.value = inp.value.replace(/[^0-9]/g, "");
+      $("b_go").disabled = inp.value === "";
+    });
+    inp.addEventListener("keydown", e=>{
+      if(e.key === "Enter" && inp.value !== "") send(id, false);
+    });
+    inp.focus();
+  }
+
   window.pick = (i)=>{
     picked = i;
     document.querySelectorAll(".opt").forEach(b=>b.dataset.on = (+b.dataset.i===i)?1:0);
     $("b_go").disabled = false;
   };
+
   window.send = async (taskId, gaveUp)=>{
     const secs = Math.round((Date.now()-diag.tStart)/1000);
     $("b_go").disabled = true;
+    let num = null;
+    if(isNum && !gaveUp){
+      const v = $("f_num").value.trim();
+      if(v === ""){ $("b_go").disabled = false; return; }
+      num = parseInt(v, 10);
+    }
     try{
       const r = await db.rpc("submit_answer", {
         p_student: student.id, p_task: taskId, p_session: diag.session,
-        p_chosen: gaveUp ? null : picked, p_gave_up: gaveUp, p_seconds: secs
+        p_chosen: (isNum || gaveUp) ? null : picked,
+        p_num: num, p_gave_up: gaveUp, p_seconds: secs
       });
       diag.answered++;
       const correct = r.data && r.data.correct === true;
@@ -426,11 +461,12 @@ async function exportCsv(){
     const rows = r.data || [];
     if(!rows.length){ $("msg").textContent = "Ответов пока нет."; return; }
     const head = ["код","имя","класс","язык","схватывает","ведёт","сессия",
-      "задача","тема","уровень","выбран","не_понял","верно","секунды","время"];
+      "тема","название_темы","уровень","тип","ответ","не_понял","верно","секунды","код_ошибки","время"];
     const csv = "\uFEFF" + head.join(";") + "\n" + rows.map(x=>[
       x.code, x.name, x.grade, x.lang, x.grasp??"", x.mentor, x.session,
-      x.task_id, x.topic_id, x.level, x.chosen??"",
-      x.gave_up?"да":"нет", x.correct?"да":"нет", x.seconds??"", x.created_at
+      x.topic??"", x.topic_name??"", x.level, x.answer_type??"", x.num_answer??"",
+      x.gave_up?"да":"нет", x.correct?"да":"нет", x.seconds??"",
+      x.error_code??"", x.created_at
     ].join(";")).join("\n");
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([csv], {type:"text/csv;charset=utf-8"}));
