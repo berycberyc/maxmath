@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="kk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MaxMath</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=PT+Serif:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<style>
+  :root{
+    --paper:#F6F7F9; --card:#FFFFFF; --ink:#1B2733; --soft:#5E6E7E;
+    --rule:#DDE3EA; --blue:#2D5F8A; --green:#3E7A5E; --red:#B4453C;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font-family:Inter,system-ui,sans-serif;font-size:16px;line-height:1.5;}
+  .wrap{max-width:680px;margin:0 auto;padding:26px 16px 60px;}
+  h1{font-family:'PT Serif',Georgia,serif;font-size:28px;line-height:1.25;
+     margin:0 0 10px;font-weight:700;letter-spacing:-.01em;}
+  h2{font-size:18px;margin:26px 0 12px;}
+  .sub{color:var(--soft);font-size:15px;margin:0 0 24px;}
+  label{display:block;font-size:13px;color:var(--soft);margin:14px 0 5px;}
+  input,select{width:100%;padding:12px 13px;border:1px solid var(--rule);
+    border-radius:8px;font:inherit;background:var(--card);color:var(--ink);}
+  input:focus,select:focus{outline:2px solid var(--blue);outline-offset:1px;}
+  .btn{appearance:none;border:0;border-radius:8px;background:var(--blue);color:#fff;
+    font:inherit;font-weight:500;padding:13px 22px;cursor:pointer;margin-top:20px;}
+  .btn:disabled{background:#B6C2CE;cursor:not-allowed;}
+  .ghost{background:none;border:1px solid var(--rule);color:var(--soft);
+    border-radius:8px;font:inherit;font-size:14px;padding:9px 14px;cursor:pointer;margin-top:0;}
+  .langrow{display:flex;gap:8px;justify-content:flex-end;margin-bottom:14px;}
+  .langrow button{background:none;border:0;font:inherit;font-size:14px;
+    color:var(--soft);cursor:pointer;padding:4px 8px;border-radius:6px;}
+  .langrow button[data-on="1"]{color:var(--blue);font-weight:700;}
+  .err{color:var(--red);font-size:14px;margin-top:12px;min-height:20px;}
+  .ok{color:var(--green);font-size:14px;margin-top:12px;min-height:20px;}
+
+  .ticks{display:flex;gap:5px;margin-bottom:22px;}
+  .tick{height:3px;flex:1;background:var(--rule);border-radius:2px;}
+  .tick[data-on="1"]{background:var(--blue);}
+  .qcard{background:var(--card);border:1px solid var(--rule);border-radius:12px;
+    padding:24px 20px;margin-bottom:16px;}
+  .qtext{font-family:'PT Serif',Georgia,serif;font-size:20px;line-height:1.55;margin:0 0 20px;}
+  .opt{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;
+    background:none;border:0;border-top:1px solid var(--rule);padding:14px 2px;
+    font:inherit;font-size:17px;cursor:pointer;color:var(--ink);}
+  .opt:last-of-type{border-bottom:1px solid var(--rule);}
+  .dot{flex:none;width:20px;height:20px;border-radius:50%;
+    border:1.5px solid #A9B7C4;margin-top:2px;}
+  .opt[data-on="1"] .dot{border-color:var(--blue);background:var(--blue);
+    box-shadow:inset 0 0 0 3.5px var(--card);}
+  .opt[data-on="1"]{color:var(--blue);}
+  .row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
+
+  table{width:100%;border-collapse:collapse;font-size:14px;margin-top:14px;}
+  th,td{text-align:left;padding:9px 7px;border-bottom:1px solid var(--rule);}
+  th{color:var(--soft);font-weight:500;font-size:13px;}
+  tr[data-off="1"] td{color:#A9B7C4;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px;}
+  .card{background:var(--card);border:1px solid var(--rule);border-radius:12px;
+    padding:20px;margin-bottom:18px;}
+  .big{font-family:'PT Serif',Georgia,serif;font-size:44px;font-weight:700;margin:16px 0 4px;}
+  @media (max-width:520px){.grid2{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>
+/* ---------- словарь интерфейса ---------- */
+const T = {
+  kz: {
+    title:"MaxMath", login_sub:"Кодыңды және құпиясөзіңді енгіз",
+    code:"Код (5 сан)", pass:"Құпиясөз", enter:"Кіру",
+    bad_login:"Код немесе құпиясөз қате",
+    hello:"Сәлем", start_diag:"Диагностиканы бастау",
+    diag_sub:"Бұл баға емес. Қатеден қорықпа — ол тек нені бірге қайталау керегін көрсетеді.",
+    question:"Сұрақ", of:"/", answer:"Жауап беру", dont_know:"Түсінбедім",
+    done_title:"Жарайсың",
+    done_sub:"Диагностика аяқталды. Нәтижелерді сабақта бірге қараймыз.",
+    tasks_done:"тапсырма орындалды", exit:"Шығу",
+    no_tasks:"Тапсырмалар әлі жүктелмеген. Мұғалімге айт.",
+    net_err:"Байланыс қатесі. Қайталап көр."
+  },
+  ru: {
+    title:"MaxMath", login_sub:"Введи свой код и пароль",
+    code:"Код (5 цифр)", pass:"Пароль", enter:"Войти",
+    bad_login:"Неверный код или пароль",
+    hello:"Привет", start_diag:"Начать диагностику",
+    diag_sub:"Это не оценка. Не бойся ошибиться — ошибки только показывают, что мы повторим вместе.",
+    question:"Вопрос", of:"из", answer:"Ответить", dont_know:"Не понял",
+    done_title:"Молодец",
+    done_sub:"Диагностика пройдена. Результаты разберём вместе на занятии.",
+    tasks_done:"задач выполнено", exit:"Выйти",
+    no_tasks:"Задачи ещё не загружены. Скажи учителю.",
+    net_err:"Ошибка связи. Попробуй ещё раз."
+  }
+};
+
+/* ---------- состояние ---------- */
+let db = null, lang = "kz", student = null, adminPin = null;
+let diag = null; // {queue, i, answered, session, tStart}
+const $ = (id) => document.getElementById(id);
+const app = document.getElementById("app");
+const t = (k) => (T[lang] && T[lang][k]) || T.ru[k] || k;
+
+function boot(){
+  const c = window.MAXMATH_CONFIG || {};
+  if(!c.SUPABASE_URL || c.SUPABASE_URL.startsWith("ВСТАВЬ")){
+    app.innerHTML = "<h1>MaxMath</h1><p class='err'>Файл config.js не заполнен: нужны URL и ключ из Supabase.</p>";
+    return;
+  }
+  db = supabase.createClient(c.SUPABASE_URL, c.SUPABASE_KEY);
+  screenLogin();
+}
+
+function langRow(){
+  return `<div class="langrow">
+    <button data-on="${lang==='kz'?1:0}" onclick="setLang('kz')">Қаз</button>
+    <button data-on="${lang==='ru'?1:0}" onclick="setLang('ru')">Рус</button>
+  </div>`;
+}
+function setLang(l){ lang = l; if(!student && !adminPin) screenLogin(); else if(student && !diag) screenStudent(); }
+
+/* ---------- вход ---------- */
+function screenLogin(){
+  student = null; adminPin = null; diag = null;
+  app.innerHTML = `
+    ${langRow()}
+    <h1>${t("title")}</h1>
+    <p class="sub">${t("login_sub")}</p>
+    <label>${t("code")}</label>
+    <input id="f_code" inputmode="numeric" maxlength="5" autocomplete="off">
+    <label>${t("pass")}</label>
+    <input id="f_pass" type="password" autocomplete="off">
+    <button class="btn" onclick="doLogin()">${t("enter")}</button>
+    <p class="err" id="msg"></p>`;
+}
+
+async function doLogin(){
+  const code = $("f_code").value.trim(), pass = $("f_pass").value;
+  $("msg").textContent = "";
+  try{
+    const r = await db.rpc("login_student", { p_code: code, p_pass: pass });
+    if(r.data){
+      student = r.data; student.code = code;
+      lang = student.lang === "kz" ? "kz" : "ru";
+      screenStudent(); return;
+    }
+    const a = await db.rpc("check_admin", { p_pin: code });
+    if(a.data === true){ adminPin = code; screenAdmin(); return; }
+    $("msg").textContent = t("bad_login");
+  }catch(e){ $("msg").textContent = t("net_err"); }
+}
+
+/* ---------- ученик ---------- */
+async function screenStudent(){
+  let nm = "";
+  try{
+    const r = await db.rpc("login_student", { p_code: student.code, p_pass: "" });
+  }catch(e){}
+  app.innerHTML = `
+    ${langRow()}
+    <h1>${t("hello")}!</h1>
+    <p class="sub">${t("diag_sub")}</p>
+    <button class="btn" onclick="startDiag()">${t("start_diag")}</button>
+    <p class="err" id="msg"></p>
+    <p style="margin-top:34px"><button class="ghost" onclick="screenLogin()">${t("exit")}</button></p>`;
+}
+
+async function startDiag(){
+  $("msg").textContent = "";
+  try{
+    const r = await db.rpc("get_diag_map");
+    const rows = r.data || [];
+    if(!rows.length){ $("msg").textContent = t("no_tasks"); return; }
+    // группируем по темам, в теме — по уровням
+    const topics = {};
+    rows.forEach(x => {
+      topics[x.topic_id] = topics[x.topic_id] || { ord:x.ord, byLevel:{} };
+      topics[x.topic_id].byLevel[x.level] = x.task_id;
+    });
+    const order = Object.values(topics).sort((a,b)=>a.ord-b.ord);
+    diag = {
+      plan: order, ti: 0, phase: "mid", answered: 0,
+      total: order.length * 2,
+      session: "diag-" + new Date().toISOString().slice(0,10),
+      tStart: 0
+    };
+    nextTask();
+  }catch(e){ $("msg").textContent = t("net_err"); }
+}
+
+function currentTaskId(){
+  const tp = diag.plan[diag.ti], L = tp.byLevel;
+  if(diag.phase === "mid")  return L[2] ?? L[1] ?? L[3];
+  if(diag.phase === "hard") return L[3] ?? null;
+  return L[1] ?? null; // easy
+}
+
+async function nextTask(){
+  const id = currentTaskId();
+  if(id == null){ advanceTopic(); return; }
+  try{
+    const r = await db.rpc("get_task", { p_task_id: id, p_lang: lang });
+    renderTask(id, r.data);
+  }catch(e){ app.innerHTML = `<p class="err">${t("net_err")}</p>`; }
+}
+
+function renderTask(id, q){
+  diag.tStart = Date.now();
+  let picked = null;
+  const ticks = diag.plan.map((_,i)=>`<div class="tick" data-on="${i<diag.ti?1:0}"></div>`).join("");
+  app.innerHTML = `
+    <div class="ticks">${ticks}</div>
+    <p class="sub">${t("question")} ${diag.answered+1} ${t("of")} ${diag.total}</p>
+    <div class="qcard">
+      <p class="qtext">${q.q}</p>
+      ${q.options.map((o,i)=>`
+        <button class="opt" data-i="${i}" data-on="0" onclick="pick(${i})">
+          <span class="dot"></span><span>${o}</span>
+        </button>`).join("")}
+    </div>
+    <div class="row">
+      <button class="btn" id="b_go" disabled onclick="send(${id}, false)">${t("answer")}</button>
+      <button class="ghost" onclick="send(${id}, true)">${t("dont_know")}</button>
+    </div>`;
+  window.pick = (i)=>{
+    picked = i;
+    document.querySelectorAll(".opt").forEach(b=>b.dataset.on = (+b.dataset.i===i)?1:0);
+    $("b_go").disabled = false;
+  };
+  window.send = async (taskId, gaveUp)=>{
+    const secs = Math.round((Date.now()-diag.tStart)/1000);
+    $("b_go").disabled = true;
+    try{
+      const r = await db.rpc("submit_answer", {
+        p_student: student.id, p_task: taskId, p_session: diag.session,
+        p_chosen: gaveUp ? null : picked, p_gave_up: gaveUp, p_seconds: secs
+      });
+      diag.answered++;
+      const correct = r.data && r.data.correct === true;
+      if(diag.phase === "mid"){
+        diag.phase = correct ? "hard" : "easy";
+        nextTask();
+      } else {
+        advanceTopic();
+      }
+    }catch(e){ app.innerHTML = `<p class="err">${t("net_err")}</p>`; }
+  };
+}
+
+function advanceTopic(){
+  diag.ti++; diag.phase = "mid";
+  if(diag.ti >= diag.plan.length) screenDone();
+  else nextTask();
+}
+
+function screenDone(){
+  const n = diag.answered; diag = null;
+  app.innerHTML = `
+    <h1>${t("done_title")}!</h1>
+    <p class="sub">${t("done_sub")}</p>
+    <div class="card" style="text-align:center">
+      <div class="big">${n}</div>
+      <div class="sub" style="margin:0">${t("tasks_done")}</div>
+    </div>
+    <button class="ghost" onclick="screenLogin()">${t("exit")}</button>`;
+}
+
+/* ---------- админ ---------- */
+async function screenAdmin(){
+  app.innerHTML = `
+    <h1>Кабинет преподавателя</h1>
+    <div class="row" style="margin-bottom:6px">
+      <button class="ghost" onclick="exportCsv()">Выгрузить ответы (CSV)</button>
+      <button class="ghost" onclick="screenLogin()">Выйти</button>
+    </div>
+    <p class="ok" id="msg"></p>
+
+    <h2>Добавить ученика</h2>
+    <div class="card">
+      <div class="grid2">
+        <div><label>Имя</label><input id="a_name"></div>
+        <div><label>Фамилия</label><input id="a_surname"></div>
+        <div><label>Код (5 цифр)</label><input id="a_code" maxlength="5" inputmode="numeric"></div>
+        <div><label>Пароль</label><input id="a_pass"></div>
+        <div><label>Класс</label>
+          <select id="a_grade"><option value="5">5</option><option value="6">6</option></select></div>
+        <div><label>Язык</label>
+          <select id="a_lang"><option value="kz">Казахский</option><option value="ru">Русский</option></select></div>
+        <div><label>Схватывает (1–3)</label>
+          <select id="a_grasp"><option>1</option><option selected>2</option><option>3</option></select></div>
+        <div><label>Ведёт</label>
+          <select id="a_mentor"><option value="main">Я</option><option value="assistant">Помощник</option></select></div>
+      </div>
+      <button class="btn" onclick="addStudent()">Добавить</button>
+    </div>
+
+    <h2>Ученики</h2>
+    <div id="students">Загружаю…</div>`;
+  loadStudents();
+}
+
+async function loadStudents(){
+  try{
+    const r = await db.rpc("list_students", { p_pin: adminPin });
+    const rows = r.data || [];
+    if(!rows.length){ $("students").innerHTML = "<p class='sub'>Пока никого нет.</p>"; return; }
+    $("students").innerHTML = `<table>
+      <tr><th>Код</th><th>Имя</th><th>Кл</th><th>Язык</th><th>Схв</th><th>Ведёт</th><th></th></tr>
+      ${rows.map(s=>`<tr data-off="${s.active?0:1}">
+        <td>${s.code}</td><td>${s.name}</td><td>${s.grade}</td>
+        <td>${s.lang==="kz"?"каз":"рус"}</td><td>${s.grasp??""}</td>
+        <td>${s.mentor==="main"?"я":"пом."}</td>
+        <td>${s.active?`<button class="ghost" onclick="deact('${s.code}')">откл.</button>`:"выкл"}</td>
+      </tr>`).join("")}
+    </table>`;
+  }catch(e){ $("students").innerHTML = "<p class='err'>Не удалось загрузить список.</p>"; }
+}
+
+async function addStudent(){
+  $("msg").textContent = "";
+  const name = ($("a_name").value.trim()+" "+$("a_surname").value.trim()).trim();
+  const code = $("a_code").value.trim(), pass = $("a_pass").value;
+  if(!/^[0-9]{5}$/.test(code)){ $("msg").textContent = "Код должен быть из 5 цифр"; return; }
+  if(!name || !pass){ $("msg").textContent = "Заполни имя и пароль"; return; }
+  try{
+    const r = await db.rpc("add_student", {
+      p_pin: adminPin, p_code: code, p_pass: pass, p_name: name,
+      p_grade: +$("a_grade").value, p_lang: $("a_lang").value,
+      p_grasp: +$("a_grasp").value, p_mentor: $("a_mentor").value
+    });
+    $("msg").textContent = r.data === "ok" ? "Добавлен: " + name : (r.data || "ошибка");
+    if(r.data === "ok"){ ["a_name","a_surname","a_code","a_pass"].forEach(i=>$(i).value=""); loadStudents(); }
+  }catch(e){ $("msg").textContent = "Ошибка связи"; }
+}
+
+async function deact(code){
+  try{ await db.rpc("deactivate_student", { p_pin: adminPin, p_code: code }); loadStudents(); }
+  catch(e){}
+}
+
+async function exportCsv(){
+  $("msg").textContent = "Готовлю выгрузку…";
+  try{
+    const r = await db.rpc("export_answers", { p_pin: adminPin });
+    const rows = r.data || [];
+    if(!rows.length){ $("msg").textContent = "Ответов пока нет."; return; }
+    const head = ["код","имя","класс","язык","схватывает","ведёт","сессия",
+      "задача","тема","уровень","выбран","не_понял","верно","секунды","время"];
+    const csv = "\uFEFF" + head.join(";") + "\n" + rows.map(x=>[
+      x.code, x.name, x.grade, x.lang, x.grasp??"", x.mentor, x.session,
+      x.task_id, x.topic_id, x.level, x.chosen??"",
+      x.gave_up?"да":"нет", x.correct?"да":"нет", x.seconds??"", x.created_at
+    ].join(";")).join("\n");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([csv], {type:"text/csv;charset=utf-8"}));
+    a.download = "maxmath-otvety.csv";
+    a.click();
+    $("msg").textContent = "Файл скачан.";
+  }catch(e){ $("msg").textContent = "Ошибка выгрузки."; }
+}
+
+boot();
+</script>
+</body>
+</html>
